@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Janus</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<aside class="panel" id="panel">
+  <header class="marca">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M12 3v18"/>
+        <path d="M12 7c-2.5 0-4.5 2.2-4.5 5s2 5 4.5 5"/>
+        <path d="M12 7c2.5 0 4.5 2.2 4.5 5s-2 5-4.5 5"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Janus</h1>
+      <p class="sub" id="sub-modelo">cargando…</p>
+    </div>
+  </header>
+
+  <section class="bloque">
+    <label class="etiqueta" for="cerebro">Cerebro</label>
+    <select id="cerebro" class="selector"></select>
+  </section>
+
+  <section class="bloque">
+    <h2 class="titulo">Hábitos <span class="hoy" id="fecha-hoy"></span></h2>
+    <ul class="habitos" id="habitos"></ul>
+  </section>
+
+  <section class="bloque">
+    <h2 class="titulo">Proyectos</h2>
+    <ul class="proyectos" id="proyectos"></ul>
+  </section>
+
+  <section class="bloque">
+    <h2 class="titulo">Inbox <span class="contador" id="inbox-n">0</span></h2>
+    <form id="form-inbox" class="captura">
+      <input id="inbox-texto" placeholder="Capturar sin pensar…" autocomplete="off">
+      <button type="submit" title="Guardar">+</button>
+    </form>
+    <ul class="inbox" id="inbox"></ul>
+  </section>
+</aside>
+
+<main class="chat">
+  <div class="conversacion" id="conversacion">
+    <div class="vacio" id="vacio">
+      <h2>Buenas.</h2>
+      <p>Cuéntame cómo va el día, o pregúntame en qué toca avanzar.</p>
+      <div class="sugerencias">
+        <button class="chip" data-prompt="¿Cómo voy de hábitos esta semana?">¿Cómo voy de hábitos?</button>
+        <button class="chip" data-prompt="¿En qué proyecto debería ponerme ahora y cuál es el siguiente paso concreto?">¿En qué me pongo ahora?</button>
+        <button class="chip" data-prompt="Clasifica lo que tengo en el inbox y mándalo donde toque.">Vaciar el inbox</button>
+        <button class="chip" data-prompt="Hazme el repaso de la semana: hábitos, proyectos y qué cambiaría.">Repaso semanal</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tareas" id="tareas"></div>
+
+  <form class="redactor" id="redactor">
+    <button type="button" id="boton-voz" class="voz" title="Dictar (barra espaciadora larga)" aria-label="Dictar">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
+      </svg>
+    </button>
+    <textarea id="entrada" rows="1" placeholder="Escribe a Janus…" autocomplete="off"></textarea>
+    <button type="submit" id="enviar" class="enviar" aria-label="Enviar">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
+    </button>
+  </form>
+  <p class="pie" id="pie"></p>
+</main>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>

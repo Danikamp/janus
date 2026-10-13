@@ -1,0 +1,7 @@
+.venv/
+python/
+__pycache__/
+*.pyc
+.env
+# Datos personales: viven en el USB, no en el repo publico. Ver data-ejemplo/.
+data/
