@@ -1,26 +1,28 @@
 @echo off
 rem Lanza Janus y abre el navegador.
+rem Usa el Python portable de python\ para que el USB arranque en cualquier
+rem Windows sin instalar nada.
 setlocal
 cd /d "%~dp0"
 
-if not exist ".venv\Scripts\python.exe" (
-  echo Primera vez: preparando el entorno...
-  python -m venv .venv || goto :error
-  .venv\Scripts\python.exe -m pip install -q --disable-pip-version-check -r requirements.txt || goto :error
+set "PY=%~dp0python\python.exe"
+if not exist "%PY%" (
+  echo.
+  echo   Falta el Python portable en "%~dp0python\".
+  echo   Descarga el paquete NuGet "python" 3.13 de nuget.org, abre el .nupkg
+  echo   como zip y copia su carpeta tools\ aqui con el nombre python\. Despues:
+  echo     python\python.exe -m pip install -r requirements.txt
+  echo.
+  pause
+  goto :eof
 )
 
 if not exist ".env" (
   copy /y ".env.example" ".env" >nul
   echo.
-  echo   Se ha creado .env. Abrelo y pon tu clave API antes de usar Janus.
+  echo   Se ha creado .env. Pon tu clave API ahi si quieres usar la IA.
   echo.
 )
 
 start "" http://127.0.0.1:8700
-.venv\Scripts\python.exe -m server.main
-goto :eof
-
-:error
-echo.
-echo   Fallo al preparar el entorno. Necesitas Python 3.11 o superior en el PATH.
-pause
+"%PY%" -m server.main

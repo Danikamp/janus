@@ -5,10 +5,18 @@ markdown y puede programar en tus proyectos con tu permiso.
 
 ## Arrancar
 
-Doble clic en **`janus.cmd`**. La primera vez prepara el entorno y crea `.env`;
-después abre <http://127.0.0.1:8700> solo.
+Doble clic en **`janus.cmd`**. Arranca con el Python portable de `python\`,
+crea `.env` si falta y abre <http://127.0.0.1:8700>.
 
-Antes del primer uso real, abre `.env` y pon al menos una clave:
+`python\` no está en el repo (pesa ~60 MB). Si clonas en limpio:
+
+1. Descarga el paquete NuGet [`python`](https://www.nuget.org/packages/python)
+   3.13, ábrelo como zip y copia su carpeta `tools\` como `python\`.
+2. `python\python.exe -m pip install -r requirements.txt`
+3. `xcopy /e /i data-ejemplo data`
+
+Para usar el chat, abre `.env` y pon al menos una clave. Sin claves, Janus
+funciona igual como tablero de hábitos, proyectos e inbox:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...      # para el cerebro Claude
@@ -119,16 +127,12 @@ proveedor y no se pueden reenviar al otro).
 
 ## Mover Janus al portátil
 
-Está pensado para eso. En la máquina nueva:
+Está pensado para eso: vive en un USB con su propio Python. Enchúfalo en
+cualquier Windows y doble clic en `janus.cmd`. No hay que instalar nada.
 
-```
-git clone <este repo>   # o copia la carpeta entera
-cd janus
-janus.cmd
-```
-
-Lo único que no viaja es `.env` (está en `.gitignore`, a propósito: contiene
-claves). Cópialo a mano o vuelve a rellenarlo.
+El repositorio solo guarda el código. `data/`, `python\` y `.env` no se suben
+(`.gitignore`): tus datos son personales y las claves también. **La copia de
+seguridad de `data/` es cosa tuya**: cópiala de vez en cuando a otro disco.
 
 ## Lo que todavía no hace
 

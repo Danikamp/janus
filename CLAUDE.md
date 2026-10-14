@@ -18,12 +18,19 @@ sin build delante, markdown como base de datos.
 ## Arrancar y probar
 
 ```powershell
-.venv\Scripts\python.exe -m server.main     # servidor en :8700
-.venv\Scripts\python.exe -X utf8 -c "from server import tools; print(tools.run('estado_general', {}))"
+python\python.exe -m server.main     # servidor en :8700
+python\python.exe -X utf8 -c "from server import tools; print(tools.run('estado_general', {}))"
 ```
+
+`python\` es un Python 3.13 portable (paquete NuGet `python`) dentro del USB,
+con las dependencias instaladas en él. Nada de `.venv`: un venv queda atado a
+la máquina y la letra de unidad donde se creó.
 
 `-X utf8` hace falta en la consola de Windows: sin él, los acentos de los datos
 revientan al imprimir.
+
+`data/` **no está en git** (el repo es público). `data-ejemplo/` tiene la
+estructura mínima. No commitear nunca nada de `data/`.
 
 ## Dónde está cada cosa
 
@@ -58,8 +65,9 @@ propiedades.
 - **`CanUseToolShadowedWarning`** al arrancar el modo programador es esperado:
   las herramientas de `allowed_tools` se auto-aprueban antes del callback. Eso
   es lo que queremos; `can_use_tool` solo tiene que atrapar lo demás (Bash).
-- **Git en el USB** necesita `git config --global --add safe.directory E:/janus`
-  porque el sistema de ficheros no guarda permisos.
+- **Git en el USB** necesita `git config --global --add safe.directory <unidad>:/janus`
+  en cada máquina (y por cada letra de unidad), porque el sistema de ficheros
+  no guarda permisos.
 
 ## Modelos
 
