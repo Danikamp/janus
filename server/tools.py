@@ -58,7 +58,7 @@ def _registrar_habito(habito: str, hecho: bool, fecha: str = "", nota: str = "")
     ids = {h["id"] for h in store.habit_defs()}
     if habito not in ids:
         return {"error": f"No existe el habito {habito!r}. Disponibles: {sorted(ids)}"}
-    day = fecha or store.date.today().isoformat()
+    day = fecha or store.hoy().isoformat()
     row = store.set_habit(day, habito, hecho, nota)
     return {"ok": True, "fecha": day, "fila": row, "racha": store.habits_state()["rachas"][habito]}
 
@@ -91,7 +91,7 @@ def _anotar_bitacora(proyecto: str, entrada: str) -> dict[str, Any]:
 def _crear_proyecto(id: str, nombre: str, descripcion: str = "") -> dict[str, Any]:
     try:
         return {"ok": True, **store.create_project(id, nombre, descripcion)}
-    except FileExistsError as exc:
+    except (FileExistsError, ValueError) as exc:
         return {"error": str(exc)}
 
 

@@ -132,6 +132,7 @@ const limpiar = (t) => (t || "").replace(/^_|_$/g, "").trim();
 /* Estados en los que la tarea sigue esperando una decision del usuario. */
 const NOTA_ESTADO = {
   pendiente_aprobacion: "Janus escribirá ficheros en el proyecto",
+  aprobada: "aprobada, pero no llegó a empezar",
   fallida: "falló el intento anterior",
   interrumpida: "se cortó a mitad",
 };

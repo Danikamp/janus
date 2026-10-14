@@ -19,8 +19,14 @@ sin build delante, markdown como base de datos.
 
 ```powershell
 python\python.exe -m server.main     # servidor en :8700
+python\python.exe -m pytest          # tests (requirements-dev.txt)
 python\python.exe -X utf8 -c "from server import tools; print(tools.run('estado_general', {}))"
 ```
+
+`tests/conftest.py` redirige **todas** las rutas de `data/` a una carpeta
+temporal (autouse). Un test nuevo que escriba datos tiene que pasar por ahí: un
+test que llamó a `/api/sesion/reiniciar` contra el `data/` real ya vació una
+sesión de chat una vez.
 
 `python\` es un Python 3.13 portable (paquete NuGet `python`) dentro del USB,
 con las dependencias instaladas en él. Nada de `.venv`: un venv queda atado a
@@ -55,6 +61,17 @@ fuera de `required`, y el modo estricto exige que `required` liste todas las
 propiedades.
 
 ## Detalles que ya han dado problemas
+
+- **Escribir siempre con `store.escribir()`** (atómico: `.tmp` + `os.replace`).
+  Nunca `write_text` ni `open("a")` sobre `data/`: el USB se puede sacar a
+  mitad de una escritura.
+- **Fechas con `store.hoy()` / `store.ahora()`**, no `date.today()`: respetan
+  `JANUS_TZ` aunque el USB esté en un PC con otra zona.
+- **El registro de hábitos conserva columnas** de hábitos ya quitados y el
+  texto escrito a mano alrededor de la tabla (`_write_log` + `replace_table`).
+- **El servidor solo atiende a sí mismo:** el middleware `solo_local` en
+  `main.py` rechaza `Host` y `Origin` ajenos. Si algún día se quiere abrir a la
+  red local, hay que añadir el host ahí, no quitar el middleware.
 
 - **Secciones con acento.** `## Bitácora` y `## Bitacora` tienen que ser la
   misma sección, o se duplican. Lo resuelve `_clave()` en `store.py`

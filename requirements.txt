@@ -4,3 +4,4 @@ claude-agent-sdk==0.2.165
 fastapi==0.143.0
 uvicorn[standard]==0.41.0
 python-multipart==0.0.20
+tzdata==2025.2

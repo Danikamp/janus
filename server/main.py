@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, AsyncIterator
 
 from fastapi import FastAPI, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import brain, coder, config, store, tools
@@ -20,6 +20,31 @@ WEB = config.ROOT / "web"
 SESIONES_DIR = config.DATA / "sesiones"
 
 app = FastAPI(title="Janus", docs_url=None, redoc_url=None)
+
+
+# --------------------------------------------------------------------------
+# Solo desde esta maquina
+# --------------------------------------------------------------------------
+
+HOSTS_PERMITIDOS = {f"{h}:{config.PORT}" for h in ("127.0.0.1", "localhost", config.HOST)}
+ORIGENES_PERMITIDOS = {f"http://{h}" for h in HOSTS_PERMITIDOS}
+METODOS_SEGUROS = {"GET", "HEAD", "OPTIONS"}
+
+
+@app.middleware("http")
+async def solo_local(request: Request, call_next):
+    """Cierra la puerta a otras webs abiertas en el mismo navegador.
+
+    - `Host` ajeno: alguien apunto un dominio suyo a 127.0.0.1 (DNS rebinding).
+    - `Origin` ajeno en un POST/DELETE: una pagina cualquiera intentando hablar
+      con Janus por detras. Sin `Origin` (curl, scripts locales) se deja pasar.
+    """
+    if request.headers.get("host", "") not in HOSTS_PERMITIDOS:
+        return JSONResponse({"detail": "Host no permitido"}, status_code=403)
+    origen = request.headers.get("origin")
+    if request.method not in METODOS_SEGUROS and origen and origen not in ORIGENES_PERMITIDOS:
+        return JSONResponse({"detail": "Origen no permitido"}, status_code=403)
+    return await call_next(request)
 
 
 # --------------------------------------------------------------------------
@@ -41,10 +66,8 @@ def cargar_sesion(sid: str = "principal") -> list[dict[str, Any]]:
 
 
 def guardar_sesion(historial: list[dict[str, Any]], sid: str = "principal") -> None:
-    SESIONES_DIR.mkdir(parents=True, exist_ok=True)
-    _ruta_sesion(sid).write_text(
-        json.dumps(historial, ensure_ascii=False, indent=1, default=str),
-        encoding="utf-8",
+    store.escribir(
+        _ruta_sesion(sid), json.dumps(historial, ensure_ascii=False, indent=1, default=str)
     )
 
 
@@ -116,11 +139,14 @@ async def marcar_habito(request: Request) -> dict[str, Any]:
     habito = cuerpo.get("habito")
     if not habito:
         raise HTTPException(400, "Falta 'habito'")
-    store.set_habit(
-        cuerpo.get("fecha") or store.date.today().isoformat(),
-        habito,
-        bool(cuerpo.get("hecho", True)),
-    )
+    try:
+        store.set_habit(
+            cuerpo.get("fecha") or store.hoy().isoformat(),
+            habito,
+            bool(cuerpo.get("hecho", True)),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from None
     return {"ok": True, "habitos": store.habits_state(days=14)}
 
 
@@ -217,19 +243,15 @@ def rechazar(task_id: str) -> dict[str, Any]:
 
 
 @app.post("/api/tareas/{task_id}/ejecutar")
-async def ejecutar_tarea(task_id: str, request: Request) -> StreamingResponse:
+async def ejecutar_tarea(task_id: str) -> StreamingResponse:
     """Aprueba y ejecuta. Este endpoint ES la aprobacion explicita del usuario."""
     tarea = store.task_get(task_id)
     if tarea is None:
         raise HTTPException(404, "Tarea no encontrada")
-    if tarea["estado"] not in ("pendiente_aprobacion", "fallida", "interrumpida"):
+    # 'aprobada' tambien: si fallo antes de empezar (sin CLI, sin carpeta), se
+    # quedaba ahi sin forma de reintentarla.
+    if tarea["estado"] not in ("pendiente_aprobacion", "aprobada", "fallida", "interrumpida"):
         raise HTTPException(409, f"La tarea esta en estado '{tarea['estado']}'")
-
-    try:
-        cuerpo = await request.json()
-    except Exception:  # noqa: BLE001 - cuerpo opcional
-        cuerpo = {}
-    permitir_bash = bool(cuerpo.get("permitir_bash"))
 
     store.task_update(task_id, estado="aprobada")
 
@@ -237,7 +259,9 @@ async def ejecutar_tarea(task_id: str, request: Request) -> StreamingResponse:
         historial = cargar_sesion()
         resumen = ""
         try:
-            async for evento in coder.ejecutar(task_id, permitir_bash=permitir_bash):
+            # Bash nunca se activa desde la API: cualquiera que llegue a este
+            # endpoint podria pedirlo. Ver "Seguridad" en CLAUDE.md.
+            async for evento in coder.ejecutar(task_id, permitir_bash=False):
                 if evento["type"] == "texto":
                     resumen += evento["texto"]
                 yield _sse(evento)

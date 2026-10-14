@@ -6,7 +6,7 @@ casi siempre esta aqui, no en el codigo.
 """
 from __future__ import annotations
 
-from datetime import date
+from .store import hoy
 
 
 IDENTITY = """\
@@ -63,4 +63,4 @@ Usa markdown cuando ayude a leer (listas, negrita), no por adornar.
 def system_prompt() -> str:
     """El prompt completo. La fecha va al final, despues de la parte estable,
     para no invalidar la cache de prompt en cada peticion."""
-    return f"{IDENTITY}\n\n## Contexto\n\nHoy es {date.today().isoformat()}."
+    return f"{IDENTITY}\n\n## Contexto\n\nHoy es {hoy().isoformat()}."
