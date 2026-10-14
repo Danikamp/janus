@@ -2,84 +2,125 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ec">
 <title>Janus</title>
+<link rel="preload" href="/assets/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/assets/janus-reposo-a.png">
 </head>
 <body>
 
-<aside class="panel" id="panel">
-  <header class="marca">
-    <div class="logo" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
-        <path d="M12 3v18"/>
-        <path d="M12 7c-2.5 0-4.5 2.2-4.5 5s2 5 4.5 5"/>
-        <path d="M12 7c2.5 0 4.5 2.2 4.5 5s-2 5-4.5 5"/>
-      </svg>
-    </div>
-    <div>
-      <h1>Janus</h1>
-      <p class="sub" id="sub-modelo">cargando…</p>
-    </div>
-  </header>
+<!-- Panel lateral: fijo en pantallas anchas, deslizante en movil -->
+<aside class="panel" id="panel" aria-label="Tus datos">
+  <div class="panel-cabecera">
+    <span class="etiqueta">Tu día</span>
+    <button class="icono" id="cerrar-panel" aria-label="Cerrar panel">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
 
   <section class="bloque">
-    <label class="etiqueta" for="cerebro">Cerebro</label>
-    <select id="cerebro" class="selector"></select>
-  </section>
-
-  <section class="bloque">
-    <h2 class="titulo">Hábitos <span class="hoy" id="fecha-hoy"></span></h2>
+    <h2 class="etiqueta">Hábitos <span class="dato" id="fecha-hoy"></span></h2>
     <ul class="habitos" id="habitos"></ul>
   </section>
 
   <section class="bloque">
-    <h2 class="titulo">Proyectos</h2>
-    <ul class="proyectos" id="proyectos"></ul>
+    <h2 class="etiqueta">Inbox <span class="dato" id="inbox-n">0</span></h2>
+    <ul class="inbox" id="inbox"></ul>
   </section>
 
   <section class="bloque">
-    <h2 class="titulo">Inbox <span class="contador" id="inbox-n">0</span></h2>
-    <form id="form-inbox" class="captura">
-      <input id="inbox-texto" placeholder="Capturar sin pensar…" autocomplete="off">
-      <button type="submit" title="Guardar">+</button>
-    </form>
-    <ul class="inbox" id="inbox"></ul>
+    <h2 class="etiqueta">Proyectos</h2>
+    <ul class="proyectos" id="proyectos"></ul>
   </section>
 </aside>
+<div class="velo" id="velo" hidden></div>
 
-<main class="chat">
-  <div class="conversacion" id="conversacion">
-    <div class="vacio" id="vacio">
-      <h2>Buenas.</h2>
-      <p>Cuéntame cómo va el día, o pregúntame en qué toca avanzar.</p>
+<div class="columna">
+
+  <header class="cabecera">
+    <button class="icono solo-movil" id="abrir-panel" aria-label="Abrir panel">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+    <div class="marca">
+      <h1>Janus<span class="destello" aria-hidden="true">✦</span></h1>
+      <p class="etiqueta">Tu compañero de pensamiento</p>
+    </div>
+    <button class="icono" id="boton-menu" aria-label="Opciones" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg>
+    </button>
+
+    <div class="menu" id="menu" hidden>
+      <label class="menu-campo">
+        <span class="etiqueta">Cerebro</span>
+        <select id="cerebro"></select>
+      </label>
+      <button class="menu-opcion" id="nueva-conversacion">Empezar de cero</button>
+      <p class="menu-pie" id="menu-pie"></p>
+    </div>
+  </header>
+
+  <main class="lienzo" id="lienzo">
+
+    <!-- Pantalla de inicio: lo que ves antes de escribir nada -->
+    <section class="inicio" id="inicio">
+      <div class="saludo">
+        <div>
+          <p class="etiqueta" id="momento">Buenas</p>
+          <h2 class="titular">¿En qué estás<br>pensando hoy?</h2>
+        </div>
+        <img class="sprite sprite-grande" id="sprite-principal" alt="" width="150" height="164">
+      </div>
+
+      <article class="tarjeta" id="tarjeta">
+        <div class="tarjeta-cabecera">
+          <span class="etiqueta">Hoy</span>
+          <span class="fecha" id="fecha-larga"></span>
+        </div>
+        <h3 class="tarjeta-titulo" id="tarjeta-titulo"></h3>
+        <p class="tarjeta-cuerpo" id="tarjeta-cuerpo"></p>
+      </article>
+
+      <section class="listado">
+        <div class="listado-cabecera">
+          <h3 class="etiqueta">Proyectos</h3>
+          <button class="enlace" data-prompt="Repásame los tres proyectos: en qué punto está cada uno y cuál debería tocar primero.">
+            Ver todos <span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <ul class="filas" id="filas-proyectos"></ul>
+      </section>
+
       <div class="sugerencias">
         <button class="chip" data-prompt="¿Cómo voy de hábitos esta semana?">¿Cómo voy de hábitos?</button>
-        <button class="chip" data-prompt="¿En qué proyecto debería ponerme ahora y cuál es el siguiente paso concreto?">¿En qué me pongo ahora?</button>
+        <button class="chip" data-prompt="¿En qué proyecto debería ponerme ahora y cuál es el siguiente paso concreto?">¿En qué me pongo?</button>
         <button class="chip" data-prompt="Clasifica lo que tengo en el inbox y mándalo donde toque.">Vaciar el inbox</button>
-        <button class="chip" data-prompt="Hazme el repaso de la semana: hábitos, proyectos y qué cambiaría.">Repaso semanal</button>
       </div>
-    </div>
-  </div>
+    </section>
+
+    <div class="conversacion" id="conversacion"></div>
+  </main>
 
   <div class="tareas" id="tareas"></div>
 
-  <form class="redactor" id="redactor">
-    <button type="button" id="boton-voz" class="voz" title="Dictar (barra espaciadora larga)" aria-label="Dictar">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/>
-        <path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
-      </svg>
+  <form class="pastilla" id="redactor">
+    <button type="button" class="redondo" id="boton-capturar" aria-label="Capturar en el inbox" title="Capturar en el inbox">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
     </button>
-    <textarea id="entrada" rows="1" placeholder="Escribe a Janus…" autocomplete="off"></textarea>
-    <button type="submit" id="enviar" class="enviar" aria-label="Enviar">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M5 12h14M13 6l6 6-6 6"/>
+    <textarea id="entrada" rows="1" placeholder="Escribe o pregúntame algo…" autocomplete="off"></textarea>
+    <button type="submit" class="redondo redondo-lleno" id="enviar" aria-label="Enviar">
+      <svg class="icono-enviar" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <svg class="icono-micro" viewBox="0 0 24 24">
+        <path d="M12 3a2.6 2.6 0 0 0-2.6 2.6v6a2.6 2.6 0 0 0 5.2 0v-6A2.6 2.6 0 0 0 12 3z"/>
+        <path d="M5.5 11.3a6.5 6.5 0 0 0 13 0M12 17.8V21"/>
       </svg>
     </button>
   </form>
+
   <p class="pie" id="pie"></p>
-</main>
+</div>
 
 <script type="module" src="/app.js"></script>
 </body>
